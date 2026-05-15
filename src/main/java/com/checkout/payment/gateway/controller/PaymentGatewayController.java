@@ -1,6 +1,6 @@
 package com.checkout.payment.gateway.controller;
 
-import com.checkout.payment.gateway.model.PostPaymentResponse;
+import com.checkout.payment.gateway.dto.PostPaymentResponse;
 import com.checkout.payment.gateway.service.PaymentGatewayService;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;

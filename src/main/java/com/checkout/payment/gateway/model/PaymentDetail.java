@@ -3,14 +3,18 @@ package com.checkout.payment.gateway.model;
 import com.checkout.payment.gateway.enums.PaymentStatus;
 import java.util.UUID;
 
-public class GetPaymentResponse {
+public class PaymentDetail {
+
   private UUID id;
   private PaymentStatus status;
-  private int cardNumberLastFour;
+  private String cardNumberLastFour;
   private int expiryMonth;
   private int expiryYear;
   private String currency;
-  private int amount;
+  private Long amount;
+  private String authorizationCode;
+
+  public PaymentDetail(){}
 
   public UUID getId() {
     return id;
@@ -28,11 +32,11 @@ public class GetPaymentResponse {
     this.status = status;
   }
 
-  public int getCardNumberLastFour() {
+  public String getCardNumberLastFour() {
     return cardNumberLastFour;
   }
 
-  public void setCardNumberLastFour(int cardNumberLastFour) {
+  public void setCardNumberLastFour(String cardNumberLastFour) {
     this.cardNumberLastFour = cardNumberLastFour;
   }
 
@@ -60,24 +64,19 @@ public class GetPaymentResponse {
     this.currency = currency;
   }
 
-  public int getAmount() {
+  public Long getAmount() {
     return amount;
   }
 
-  public void setAmount(int amount) {
+  public void setAmount(Long amount) {
     this.amount = amount;
   }
 
-  @Override
-  public String toString() {
-    return "GetPaymentResponse{" +
-        "id=" + id +
-        ", status=" + status +
-        ", cardNumberLastFour=" + cardNumberLastFour +
-        ", expiryMonth=" + expiryMonth +
-        ", expiryYear=" + expiryYear +
-        ", currency='" + currency + '\'' +
-        ", amount=" + amount +
-        '}';
+  public String getAuthorizationCode() {
+    return authorizationCode;
+  }
+
+  public void setAuthorizationCode(String authorizationCode) {
+    this.authorizationCode = authorizationCode;
   }
 }
