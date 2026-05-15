@@ -5,10 +5,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.checkout.payment.gateway.enums.PaymentStatus;
-import com.checkout.payment.gateway.dto.PostPaymentResponse;
 import com.checkout.payment.gateway.model.PaymentDetail;
-import com.checkout.payment.gateway.repository.PaymentsRepository;
 import java.util.UUID;
+import com.checkout.payment.gateway.repository.PaymentsRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,6 +22,7 @@ class PaymentGatewayControllerTest {
 
   @Autowired
   private MockMvc mvc;
+
   @Autowired
   PaymentsRepository paymentsRepository;
 
