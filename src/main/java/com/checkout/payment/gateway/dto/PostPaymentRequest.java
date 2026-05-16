@@ -11,7 +11,7 @@ public record PostPaymentRequest(
     String cvv
 ) {
 
-  public String getCardNumberFour(){
+  public String getCardNumberLastFour(){
     return cardNumber.length() >= 4 ?
         cardNumber.substring(cardNumber.length() - 4): cardNumber;
   }
@@ -23,12 +23,11 @@ public record PostPaymentRequest(
   @Override
   public String toString() {
     return "PostPaymentRequest{" +
-        "cardNumberLastFour=" + getCardNumberFour() +
+        "cardNumberLastFour=" + getCardNumberLastFour() +
         ", expiryMonth=" + expiryMonth +
         ", expiryYear=" + expiryYear +
         ", currency='" + currency + '\'' +
         ", amount=" + amount +
-        ", cvv=" + cvv +
         '}';
   }
 }

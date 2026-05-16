@@ -1,7 +1,5 @@
 package com.checkout.payment.gateway.exception;
 
-import com.checkout.payment.gateway.dto.PostPaymentRequest;
-
 public class IdempotencyMissingException extends RuntimeException{
 
   private final String requestSummary;
