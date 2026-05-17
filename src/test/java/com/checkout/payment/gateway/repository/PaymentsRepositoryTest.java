@@ -9,7 +9,6 @@ import com.checkout.payment.gateway.model.PaymentDetail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.UUID;
 

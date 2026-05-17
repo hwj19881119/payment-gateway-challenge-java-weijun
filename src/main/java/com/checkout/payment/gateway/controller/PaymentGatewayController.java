@@ -3,6 +3,7 @@ package com.checkout.payment.gateway.controller;
 import com.checkout.payment.gateway.dto.PostPaymentRequest;
 import com.checkout.payment.gateway.dto.PostPaymentResponse;
 import com.checkout.payment.gateway.dto.PostPaymentResponseWithStatus;
+import com.checkout.payment.gateway.exception.IdempotencyMissingException;
 import com.checkout.payment.gateway.service.PaymentGatewayService;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -30,9 +31,13 @@ public class PaymentGatewayController {
 
   @PostMapping
   public ResponseEntity<PostPaymentResponse> processPayment(
-      @RequestHeader(value="Idempotency-Key", required = true) String idempotencyKey,
+      @RequestHeader(value="Idempotency-Key", required = false) String idempotencyKey,
       @RequestBody PostPaymentRequest request
   ){
+    if(idempotencyKey == null || idempotencyKey.isBlank()){
+      throw new IdempotencyMissingException("POST /payments");
+    }
+
     LOG.debug("POST /payments received, idempotency key: {}, request: {}",
         idempotencyKey, request.toString());
 

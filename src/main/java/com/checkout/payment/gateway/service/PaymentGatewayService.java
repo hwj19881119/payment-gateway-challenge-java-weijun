@@ -85,7 +85,7 @@ public class PaymentGatewayService {
     List<String> errors = validator.validate(paymentRequest);
     if(!errors.isEmpty()){
       LOG.warn("Payment validation failed: {}", errors);
-      throw  new PaymentRejectedException(errors);
+      throw new PaymentRejectedException(errors);
     }
 
     // step 3: authorize the payment
@@ -133,7 +133,7 @@ public class PaymentGatewayService {
   private PaymentDetail toPaymentDetail(PostPaymentRequest paymentRequest,
       BankResponse bankResponse) {
     PaymentDetail payment = new PaymentDetail();
-    payment.setStatus(bankResponse.authorized() ? PaymentStatus.AUTHORIZED: PaymentStatus.REJECTED);
+    payment.setStatus(bankResponse.authorized() ? PaymentStatus.AUTHORIZED: PaymentStatus.DECLINED);
     payment.setCardNumberLastFour(paymentRequest.getCardNumberLastFour());
     payment.setExpiryMonth(paymentRequest.expiryMonth());
     payment.setExpiryYear(paymentRequest.expiryYear());
