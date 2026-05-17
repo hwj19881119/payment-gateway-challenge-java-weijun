@@ -286,4 +286,85 @@ class PaymentGatewayIntegrationTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").exists());
   }
+
+  // ===== POST — Jakarta validation (wrong arguments) =====
+
+  @Test
+  void postPaymentBlankCardNumberReturns400() throws Exception {
+    String body = """
+        {
+          "card_number": "",
+          "expiry_month": 12,
+          "expiry_year": 2030,
+          "currency": "USD",
+          "amount": 1000,
+          "cvv": "123"
+        }
+        """;
+
+    mockMvc.perform(post("/payments")
+            .header("Idempotency-Key", "key-blank-card")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value("Rejected"))
+        .andExpect(jsonPath("$.errors").exists());
+  }
+
+  @Test
+  void postPaymentNegativeAmountReturns400() throws Exception {
+    String body = """
+        {
+          "card_number": "4111111111111111",
+          "expiry_month": 12,
+          "expiry_year": 2030,
+          "currency": "USD",
+          "amount": -100,
+          "cvv": "123"
+        }
+        """;
+
+    mockMvc.perform(post("/payments")
+            .header("Idempotency-Key", "key-negative-amount")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value("Rejected"))
+        .andExpect(jsonPath("$.errors").exists());
+  }
+
+  @Test
+  void postPaymentMissingRequiredFieldsReturns400() throws Exception {
+    String body = "{}";
+
+    mockMvc.perform(post("/payments")
+            .header("Idempotency-Key", "key-missing-fields")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value("Rejected"))
+        .andExpect(jsonPath("$.errors").exists());
+  }
+
+  @Test
+  void postPaymentInvalidCardNumberFormatReturns400() throws Exception {
+    String body = """
+        {
+          "card_number": "abcd1234",
+          "expiry_month": 12,
+          "expiry_year": 2030,
+          "currency": "USD",
+          "amount": 1000,
+          "cvv": "123"
+        }
+        """;
+
+    mockMvc.perform(post("/payments")
+            .header("Idempotency-Key", "key-non-numeric-card")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(body))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value("Rejected"))
+        .andExpect(jsonPath("$.errors").exists());
+  }
 }

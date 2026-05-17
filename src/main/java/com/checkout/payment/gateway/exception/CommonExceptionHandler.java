@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import java.util.List;
 
 @ControllerAdvice
 public class CommonExceptionHandler {
@@ -54,6 +56,18 @@ public class CommonExceptionHandler {
     LOG.warn("Missing idempotency key: {}", ex.getMessage());
     return new ResponseEntity<>(
         new ErrorResponse(ex.getMessage()),
+        HttpStatus.BAD_REQUEST
+    );
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ValidationErrorResponse> handleValidation(MethodArgumentNotValidException ex){
+    List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+        .map(error -> error.getField() + ": " + error.getDefaultMessage())
+        .toList();
+    LOG.warn("Request validation failed: {}", errors);
+    return new ResponseEntity<>(
+        new ValidationErrorResponse(PaymentStatus.REJECTED, errors),
         HttpStatus.BAD_REQUEST
     );
   }

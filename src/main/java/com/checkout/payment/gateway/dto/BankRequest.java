@@ -17,7 +17,7 @@ public record BankRequest(
 
   @Override
   public String toString(){
-    return "BankResponse{" +
+    return "BankRequest{" +
         "cardNumberLastFour=" + getCardNumberFour() +
         ",expiry_date=" + expiryDate +
         ",currency=" + currency +
