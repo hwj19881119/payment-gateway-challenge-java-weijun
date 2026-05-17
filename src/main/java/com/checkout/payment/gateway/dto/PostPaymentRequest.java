@@ -53,11 +53,11 @@ public record PostPaymentRequest(
   @Override
   public String toString() {
     return "PostPaymentRequest{" +
-        "cardNumberLastFour=" + getCardNumberLastFour() +
-        ", expiryMonth=" + expiryMonth +
-        ", expiryYear=" + expiryYear +
-        ", currency='" + currency + '\'' +
-        ", amount=" + amount +
+        "cardNumberLastFour='%s'".formatted(getCardNumberLastFour()) +
+        ", expiryMonth=%d".formatted(expiryMonth) +
+        ", expiryYear=%d".formatted(expiryYear) +
+        ", currency='%s'".formatted(currency) +
+        ", amount=%d".formatted(amount) +
         '}';
   }
 }
