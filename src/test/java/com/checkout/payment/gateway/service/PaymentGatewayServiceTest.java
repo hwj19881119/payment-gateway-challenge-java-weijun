@@ -12,7 +12,7 @@ import com.checkout.payment.gateway.exception.IdempotencyConflictException;
 import com.checkout.payment.gateway.exception.PaymentNotFoundException;
 import com.checkout.payment.gateway.exception.PaymentRejectedException;
 import com.checkout.payment.gateway.model.PaymentDetail;
-import com.checkout.payment.gateway.repository.PaymentsRepository;
+import com.checkout.payment.gateway.repository.PaymentsRepositoryInterface;
 import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckResult;
 import com.checkout.payment.gateway.validation.PaymentRequestValidator;
 
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PaymentGatewayServiceTest {
 
-  @Mock PaymentsRepository paymentsRepository;
+  @Mock PaymentsRepositoryInterface paymentsRepository;
   @Mock IdempotencyService idempotencyService;
   @Mock PaymentRequestValidator validator;
   @Mock BankClient bankClient;

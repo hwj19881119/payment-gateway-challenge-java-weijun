@@ -4,7 +4,7 @@ import com.checkout.payment.gateway.client.BankClient;
 import com.checkout.payment.gateway.dto.BankResponse;
 import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.model.PaymentDetail;
-import com.checkout.payment.gateway.repository.PaymentsRepository;
+import com.checkout.payment.gateway.repository.InMemoryPaymentsRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class PaymentGatewayIntegrationTest {
   }
 
   @Autowired MockMvc mockMvc;
-  @Autowired PaymentsRepository paymentsRepository;
+  @Autowired InMemoryPaymentsRepository paymentsRepository;
   @Autowired BankClient bankClient;
 
   @BeforeEach

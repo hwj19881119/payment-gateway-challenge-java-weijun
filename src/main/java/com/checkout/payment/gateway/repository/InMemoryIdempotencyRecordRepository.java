@@ -10,12 +10,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class IdempotencyRecordRepository {
+public class InMemoryIdempotencyRecordRepository implements IdempotencyRepositoryInterface {
 
-  private static final Logger LOG = LoggerFactory.getLogger(IdempotencyRecordRepository.class);
+  private static final Logger LOG = LoggerFactory.getLogger(InMemoryIdempotencyRecordRepository.class);
 
   private final ConcurrentHashMap<String, IdempotencyRecord> records = new ConcurrentHashMap<>();
 
+  @Override
   public IdempotencyRecord save(IdempotencyRecord record){
     if(record.getId() == null){
       record.setId(UUID.randomUUID());
@@ -27,11 +28,13 @@ public class IdempotencyRecordRepository {
     return record;
   }
 
+  @Override
   public Optional<IdempotencyRecord> get(String idempotencyKey){
     return Optional.ofNullable(records.get(idempotencyKey));
   }
 
 
+  @Override
   public void delete(String idempotencyKey){
     LOG.debug("Idempotency key deleted: key={}", idempotencyKey);
     if(records.containsKey(idempotencyKey)){

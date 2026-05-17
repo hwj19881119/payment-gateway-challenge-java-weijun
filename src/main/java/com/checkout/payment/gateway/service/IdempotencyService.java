@@ -4,7 +4,7 @@ import com.checkout.payment.gateway.dto.PostPaymentRequest;
 import com.checkout.payment.gateway.dto.PostPaymentResponse;
 import com.checkout.payment.gateway.enums.IdempotencyStatus;
 import com.checkout.payment.gateway.model.IdempotencyRecord;
-import com.checkout.payment.gateway.repository.IdempotencyRecordRepository;
+import com.checkout.payment.gateway.repository.IdempotencyRepositoryInterface;
 import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckResult.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +18,10 @@ import java.util.Optional;
 @Service
 public class IdempotencyService {
 
-  private final IdempotencyRecordRepository idempotencyRepository;
+  private final IdempotencyRepositoryInterface idempotencyRepository;
   private static final Logger LOG = LoggerFactory.getLogger(IdempotencyService.class);
 
-  public IdempotencyService(IdempotencyRecordRepository idempotencyRepository) {
+  public IdempotencyService(IdempotencyRepositoryInterface idempotencyRepository) {
     this.idempotencyRepository = idempotencyRepository;
   }
 
