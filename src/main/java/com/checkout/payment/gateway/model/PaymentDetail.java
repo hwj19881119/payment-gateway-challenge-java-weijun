@@ -1,6 +1,7 @@
 package com.checkout.payment.gateway.model;
 
 import com.checkout.payment.gateway.enums.PaymentStatus;
+import java.time.Instant;
 import java.util.UUID;
 
 public class PaymentDetail {
@@ -13,6 +14,8 @@ public class PaymentDetail {
   private String currency;
   private Long amount;
   private String authorizationCode;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   public PaymentDetail(){}
 
@@ -78,5 +81,21 @@ public class PaymentDetail {
 
   public void setAuthorizationCode(String authorizationCode) {
     this.authorizationCode = authorizationCode;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
   }
 }
