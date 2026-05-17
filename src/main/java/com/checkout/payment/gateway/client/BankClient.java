@@ -30,7 +30,7 @@ public class BankClient {
 
   public BankResponse sendPayment(BankRequest request){
     String paymentUrl = bankUrl + "/payments";
-    LOG.debug("Sending payment to bank payment url: {}", paymentUrl);
+    LOG.debug("Sending payment to bank payment url: {}, request: {}", paymentUrl, request);
 
     try{
       BankResponse response = restTemplate.postForObject(paymentUrl, request, BankResponse.class);
