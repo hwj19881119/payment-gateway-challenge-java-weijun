@@ -15,12 +15,11 @@ import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckR
 import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckResult.Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Optional;
 import java.util.UUID;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class IdempotencyServiceTest {
 
 
@@ -160,6 +159,17 @@ public class IdempotencyServiceTest {
     idempotencyService.deleteRequest(mockKey);
     record = idempotencyRepository.get(mockKey);
     assertFalse(record.isPresent());
+  }
+
+  @Test
+  void completeRequestNonExistentKeyThrows() {
+    assertThrows(RuntimeException.class,
+        () -> idempotencyService.completeRequest("non-existent-key", mockAuthorizedResponse()));
+  }
+
+  @Test
+  void deleteNonExistentKeyNoError() {
+    idempotencyService.deleteRequest("non-existent-key");
   }
 
 
