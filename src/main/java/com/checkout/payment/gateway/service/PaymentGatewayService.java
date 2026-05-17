@@ -40,7 +40,7 @@ public class PaymentGatewayService {
   }
 
   public PostPaymentResponse getPaymentById(UUID id) {
-    LOG.debug("Requesting access to to payment with ID {}", id);
+    LOG.debug("Requesting access to payment with ID {}", id);
     PaymentDetail payment = paymentsRepository.get(id)
         .orElseThrow(() -> new PaymentNotFoundException("Invalid Payment ID: %s".formatted(id)));
     return new PostPaymentResponse(
@@ -77,7 +77,7 @@ public class PaymentGatewayService {
         // return with status code?
         return PostPaymentResponseWithStatus.cachedResponse(idempotencyResult.cachedResponse());
       case CREATED:
-        LOG.debug("Idempotency result: new request, continue for next stop");
+        LOG.debug("Idempotency result: new request, continue for next step");
         break;
     }
 
@@ -85,6 +85,10 @@ public class PaymentGatewayService {
     List<String> errors = validator.validate(paymentRequest);
     if(!errors.isEmpty()){
       LOG.warn("Payment validation failed: {}", errors);
+
+      // remove invalid request to prevent new request in stuck,
+      // but it might not be necessary if new idempotencyKey with new request
+      idempotencyService.deleteRequest(idempotencyKey);
       throw new PaymentRejectedException(errors);
     }
 
@@ -147,7 +151,7 @@ public class PaymentGatewayService {
     try{
       idempotencyService.completeRequest(idempotencyKey, response);
     }catch (Exception e){
-      LOG.error("Failed to complete the idempotency request");
+      LOG.error("Failed to complete the idempotency request", e);
     }
   }
 
