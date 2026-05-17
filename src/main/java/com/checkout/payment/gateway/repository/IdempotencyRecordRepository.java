@@ -33,7 +33,11 @@ public class IdempotencyRecordRepository {
 
 
   public void delete(String idempotencyKey){
-    records.remove(idempotencyKey);
-    LOG.debug("Idempotency ");
+    LOG.debug("Idempotency key deleted: key={}", idempotencyKey);
+    if(records.containsKey(idempotencyKey)){
+      records.remove(idempotencyKey);
+    }else{
+      LOG.warn("idempotency key missed: key={}", idempotencyKey);
+    }
   }
 }
