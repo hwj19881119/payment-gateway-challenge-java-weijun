@@ -74,7 +74,7 @@ public class PaymentGatewayService {
             "Idempotency key has already been used with a different body", idempotencyKey);
       case CACHED:
         LOG.warn("Idempotency result: request has been cached for key={}", idempotencyKey);
-        // return with status code?
+        // return with status code
         return PostPaymentResponseWithStatus.cachedResponse(idempotencyResult.cachedResponse());
       case CREATED:
         LOG.debug("Idempotency result: new request, continue for next step");
@@ -125,8 +125,8 @@ public class PaymentGatewayService {
 
     }catch(BankServiceException e){
       LOG.warn("bank service exception: {}", e.getMessage());
-//      // TODO: judge to delete request from idempotency to support retrying
-//      idempotencyService.deleteRequest(idempotencyKey);
+      // remove idempotency record for new retry in this case
+      idempotencyService.deleteRequest(idempotencyKey);
       throw e;
     }
 

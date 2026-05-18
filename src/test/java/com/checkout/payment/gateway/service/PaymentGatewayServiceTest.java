@@ -145,6 +145,7 @@ class PaymentGatewayServiceTest {
         () -> service.processPayment(IDEMPOTENCY_KEY, validRequest()));
 
     assertEquals(List.of("Card has been expired."), ex.getErrors());
+    verify(idempotencyService).deleteRequest(IDEMPOTENCY_KEY);
     verifyNoInteractions(bankClient, paymentsRepository);
   }
 
@@ -228,6 +229,7 @@ class PaymentGatewayServiceTest {
     assertThrows(BankServiceException.class,
         () -> service.processPayment(IDEMPOTENCY_KEY, request));
 
+    verify(idempotencyService).deleteRequest(IDEMPOTENCY_KEY);
     verifyNoInteractions(paymentsRepository);
   }
 
