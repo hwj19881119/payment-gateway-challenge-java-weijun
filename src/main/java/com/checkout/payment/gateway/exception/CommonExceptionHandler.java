@@ -52,10 +52,10 @@ public class CommonExceptionHandler {
   }
 
   @ExceptionHandler(IdempotencyMissingException.class)
-  public ResponseEntity<ErrorResponse> handleIdempotencyMissing(IdempotencyMissingException ex){
+  public ResponseEntity<ValidationErrorResponse> handleIdempotencyMissing(IdempotencyMissingException ex){
     LOG.warn("Missing idempotency key: {}", ex.getMessage());
     return new ResponseEntity<>(
-        new ErrorResponse(ex.getMessage()),
+        new ValidationErrorResponse(PaymentStatus.REJECTED, List.of(ex.getMessage())),
         HttpStatus.BAD_REQUEST
     );
   }

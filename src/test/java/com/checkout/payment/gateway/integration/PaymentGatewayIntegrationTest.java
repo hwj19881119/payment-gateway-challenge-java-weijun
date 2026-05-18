@@ -284,7 +284,8 @@ class PaymentGatewayIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(VALID_BODY))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").exists());
+        .andExpect(jsonPath("$.status").value("Rejected"))
+        .andExpect(jsonPath("$.errors").exists());
   }
 
   // ===== POST — Jakarta validation (wrong arguments) =====
