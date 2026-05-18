@@ -22,7 +22,7 @@ public class InMemoryIdempotencyRecordRepository implements IdempotencyRepositor
       record.setId(UUID.randomUUID());
       record.setCreatedAt(Instant.now());
     }
-    record.setUpdatedAt(Instant.now());;
+    record.setUpdatedAt(Instant.now());
     records.put(record.getIdempotencyKey(), record);
     LOG.debug("Idempotency key save: {}, status: {}", record.getIdempotencyKey(), record.getStatus());
     return record;
@@ -33,14 +33,13 @@ public class InMemoryIdempotencyRecordRepository implements IdempotencyRepositor
     return Optional.ofNullable(records.get(idempotencyKey));
   }
 
-
   @Override
   public void delete(String idempotencyKey){
-    LOG.debug("Idempotency key deleted: key={}", idempotencyKey);
-    if(records.containsKey(idempotencyKey)){
-      records.remove(idempotencyKey);
+    IdempotencyRecord removed = records.remove(idempotencyKey);
+    if(removed != null){
+      LOG.debug("Idempotency key deleted: key={}", idempotencyKey);
     }else{
-      LOG.warn("idempotency key missed: key={}", idempotencyKey);
+      LOG.warn("Idempotency key not found for deletion: key={}", idempotencyKey);
     }
   }
 }

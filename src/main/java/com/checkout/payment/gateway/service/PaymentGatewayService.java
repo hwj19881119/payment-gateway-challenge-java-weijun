@@ -3,7 +3,7 @@ package com.checkout.payment.gateway.service;
 import com.checkout.payment.gateway.client.BankClient;
 import com.checkout.payment.gateway.dto.BankRequest;
 import com.checkout.payment.gateway.dto.BankResponse;
-import com.checkout.payment.gateway.dto.PostPaymentResponseWithStatus;
+import com.checkout.payment.gateway.dto.ProcessPaymentResult;
 import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.exception.BankServiceException;
 import com.checkout.payment.gateway.exception.IdempotencyConflictException;
@@ -55,7 +55,7 @@ public class PaymentGatewayService {
   }
 
 
-  public PostPaymentResponseWithStatus processPayment(String idempotencyKey, PostPaymentRequest paymentRequest) {
+  public ProcessPaymentResult processPayment(String idempotencyKey, PostPaymentRequest paymentRequest) {
     LOG.info("Processing payment for key={} and request={}", idempotencyKey, paymentRequest);
 
     // step 1: check request idempotency status
@@ -75,7 +75,7 @@ public class PaymentGatewayService {
       case CACHED:
         LOG.warn("Idempotency result: request has been cached for key={}", idempotencyKey);
         // return with status code
-        return PostPaymentResponseWithStatus.cachedResponse(idempotencyResult.cachedResponse());
+        return ProcessPaymentResult.cachedPayment(idempotencyResult.cachedResponse());
       case CREATED:
         LOG.debug("Idempotency result: new request, continue for next step");
         break;
@@ -121,7 +121,7 @@ public class PaymentGatewayService {
 
       // step 4: set request idempotency record to COMPLETE and cache the response
       completeIdempotency(idempotencyKey, response);
-      return PostPaymentResponseWithStatus.newResponse(response);
+      return ProcessPaymentResult.newPayment(response);
 
     }catch(BankServiceException e){
       LOG.warn("bank service exception: {}", e.getMessage());

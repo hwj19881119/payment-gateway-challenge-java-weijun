@@ -1,8 +1,8 @@
 package com.checkout.payment.gateway.controller;
 
+import com.checkout.payment.gateway.dto.ProcessPaymentResult;
 import com.checkout.payment.gateway.dto.PostPaymentRequest;
 import com.checkout.payment.gateway.dto.PostPaymentResponse;
-import com.checkout.payment.gateway.dto.PostPaymentResponseWithStatus;
 import com.checkout.payment.gateway.exception.IdempotencyMissingException;
 import com.checkout.payment.gateway.service.PaymentGatewayService;
 import java.util.UUID;
@@ -42,9 +42,12 @@ public class PaymentGatewayController {
     LOG.debug("POST /payments received, idempotency key: {}, request: {}",
         idempotencyKey, request.toString());
 
-    PostPaymentResponseWithStatus response = paymentGatewayService.processPayment(idempotencyKey, request);
-    LOG.debug("POST payment response received: status={}, response={}", response.httpStatus(), response.postPaymentResponse().toString());
-    return new ResponseEntity<>(response.postPaymentResponse(), response.httpStatus());
+    ProcessPaymentResult result = paymentGatewayService.processPayment(idempotencyKey, request);
+    LOG.debug("POST payment response received: cached={}, response={}", result.cached(), result.response().toString());
+
+    HttpStatus status = result.cached()? HttpStatus.OK: HttpStatus.CREATED;
+
+    return new ResponseEntity<>(result.response(), status);
 
   }
 

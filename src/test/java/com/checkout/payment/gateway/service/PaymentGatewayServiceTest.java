@@ -5,7 +5,7 @@ import com.checkout.payment.gateway.dto.BankRequest;
 import com.checkout.payment.gateway.dto.BankResponse;
 import com.checkout.payment.gateway.dto.PostPaymentRequest;
 import com.checkout.payment.gateway.dto.PostPaymentResponse;
-import com.checkout.payment.gateway.dto.PostPaymentResponseWithStatus;
+import com.checkout.payment.gateway.dto.ProcessPaymentResult;
 import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.exception.BankServiceException;
 import com.checkout.payment.gateway.exception.IdempotencyConflictException;
@@ -22,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -126,11 +125,11 @@ class PaymentGatewayServiceTest {
     when(idempotencyService.checkOrCreateRequest(anyString(), any()))
         .thenReturn(new IdempotencyCheckResult(IdempotencyCheckResult.Type.CACHED, cached));
 
-    PostPaymentResponseWithStatus result =
+    ProcessPaymentResult result =
         service.processPayment(IDEMPOTENCY_KEY, validRequest());
 
-    assertEquals(cached, result.postPaymentResponse());
-    assertEquals(HttpStatus.OK, result.httpStatus());
+    assertEquals(cached, result.response());
+    assertEquals(true, result.cached());
     verifyNoInteractions(validator, bankClient, paymentsRepository);
   }
 
@@ -168,14 +167,14 @@ class PaymentGatewayServiceTest {
           return pd;
         });
 
-    PostPaymentResponseWithStatus result =
+    ProcessPaymentResult result =
         service.processPayment(IDEMPOTENCY_KEY, request);
 
-    assertEquals(HttpStatus.CREATED, result.httpStatus());
-    assertEquals(PaymentStatus.AUTHORIZED, result.postPaymentResponse().status());
-    assertEquals(request.getCardNumberLastFour(), result.postPaymentResponse().cardNumberLastFour());
-    assertEquals(request.currency(), result.postPaymentResponse().currency());
-    assertEquals(request.amount(), result.postPaymentResponse().amount());
+    assertEquals(false, result.cached());
+    assertEquals(PaymentStatus.AUTHORIZED, result.response().status());
+    assertEquals(request.getCardNumberLastFour(), result.response().cardNumberLastFour());
+    assertEquals(request.currency(), result.response().currency());
+    assertEquals(request.amount(), result.response().amount());
 
     // verify bank request mapping
     ArgumentCaptor<BankRequest> bankCaptor = ArgumentCaptor.forClass(BankRequest.class);
@@ -208,11 +207,11 @@ class PaymentGatewayServiceTest {
           return pd;
         });
 
-    PostPaymentResponseWithStatus result =
+    ProcessPaymentResult result =
         service.processPayment(IDEMPOTENCY_KEY, request);
 
-    assertEquals(HttpStatus.CREATED, result.httpStatus());
-    assertEquals(PaymentStatus.DECLINED, result.postPaymentResponse().status());
+    assertEquals(false, result.cached());
+    assertEquals(PaymentStatus.DECLINED, result.response().status());
   }
 
   // ===== processPayment bad gateway — bank service exception =====

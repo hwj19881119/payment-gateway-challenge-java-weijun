@@ -1,7 +1,7 @@
 package com.checkout.payment.gateway.controller;
 
+import com.checkout.payment.gateway.dto.ProcessPaymentResult;
 import com.checkout.payment.gateway.dto.PostPaymentResponse;
-import com.checkout.payment.gateway.dto.PostPaymentResponseWithStatus;
 import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.exception.BankServiceException;
 import com.checkout.payment.gateway.exception.CommonExceptionHandler;
@@ -91,7 +91,7 @@ class PaymentGatewayControllerTest {
     PostPaymentResponse response = new PostPaymentResponse(
         UUID.randomUUID(), PaymentStatus.AUTHORIZED, "1111", 12, 2030, "USD", 1000L);
     when(service.processPayment(anyString(), any()))
-        .thenReturn(PostPaymentResponseWithStatus.newResponse(response));
+        .thenReturn(ProcessPaymentResult.newPayment(response));
 
     mockMvc.perform(post("/payments")
             .header("Idempotency-Key", "key-123")
@@ -107,7 +107,7 @@ class PaymentGatewayControllerTest {
     PostPaymentResponse response = new PostPaymentResponse(
         UUID.randomUUID(), PaymentStatus.AUTHORIZED, "1111", 12, 2030, "USD", 1000L);
     when(service.processPayment(anyString(), any()))
-        .thenReturn(PostPaymentResponseWithStatus.cachedResponse(response));
+        .thenReturn(ProcessPaymentResult.cachedPayment(response));
 
     mockMvc.perform(post("/payments")
             .header("Idempotency-Key", "key-123")
@@ -122,7 +122,7 @@ class PaymentGatewayControllerTest {
     PostPaymentResponse response = new PostPaymentResponse(
         UUID.randomUUID(), PaymentStatus.DECLINED, "1111", 12, 2030, "USD", 1000L);
     when(service.processPayment(anyString(), any()))
-        .thenReturn(PostPaymentResponseWithStatus.newResponse(response));
+        .thenReturn(ProcessPaymentResult.newPayment(response));
 
     mockMvc.perform(post("/payments")
             .header("Idempotency-Key", "key-123")
