@@ -25,12 +25,11 @@ public class IdempotencyService {
     this.idempotencyRepository = idempotencyRepository;
   }
 
-  public IdempotencyCheckResult checkOrCreateRequest(String idempotencyKey, PostPaymentRequest request){
+  public synchronized IdempotencyCheckResult checkOrCreateRequest(String idempotencyKey, PostPaymentRequest request){
     String requestHash = generateRequestHash(request, idempotencyKey);
     LOG.debug("request hash: key={}, request={}, hash={}", idempotencyKey, request, requestHash);
 
     Optional<IdempotencyRecord> ret = idempotencyRepository.get(idempotencyKey);
-
 
     if(ret.isEmpty()){
       IdempotencyRecord record = new IdempotencyRecord();
