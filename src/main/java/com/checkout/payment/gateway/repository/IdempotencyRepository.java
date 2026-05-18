@@ -3,7 +3,7 @@ package com.checkout.payment.gateway.repository;
 import com.checkout.payment.gateway.model.IdempotencyRecord;
 import java.util.Optional;
 
-public interface IdempotencyRepositoryInterface {
+public interface IdempotencyRepository {
 
   IdempotencyRecord save(IdempotencyRecord record);
 

@@ -12,7 +12,7 @@ import com.checkout.payment.gateway.dto.PostPaymentRequest;
 import com.checkout.payment.gateway.dto.PostPaymentResponse;
 import com.checkout.payment.gateway.exception.PaymentRejectedException;
 import com.checkout.payment.gateway.model.PaymentDetail;
-import com.checkout.payment.gateway.repository.PaymentsRepositoryInterface;
+import com.checkout.payment.gateway.repository.PaymentsRepository;
 import java.util.List;
 import java.util.UUID;
 import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckResult;
@@ -26,12 +26,12 @@ public class PaymentGatewayService {
 
   private static final Logger LOG = LoggerFactory.getLogger(PaymentGatewayService.class);
 
-  private final PaymentsRepositoryInterface paymentsRepository;
+  private final PaymentsRepository paymentsRepository;
   private final IdempotencyService idempotencyService;
   private final PaymentRequestValidator validator;
   private final BankClient bankClient;
 
-  public PaymentGatewayService(PaymentsRepositoryInterface paymentsRepository,
+  public PaymentGatewayService(PaymentsRepository paymentsRepository,
       IdempotencyService idempotencyService, PaymentRequestValidator validator, BankClient bankClient) {
     this.paymentsRepository = paymentsRepository;
     this.idempotencyService = idempotencyService;

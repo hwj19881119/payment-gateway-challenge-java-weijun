@@ -8,7 +8,7 @@ import com.checkout.payment.gateway.model.PaymentDetail;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class InMemoryPaymentsRepository implements PaymentsRepositoryInterface {
+public class InMemoryPaymentsRepository implements PaymentsRepository {
 
   private final ConcurrentHashMap<UUID, PaymentDetail> payments = new ConcurrentHashMap<>();
 

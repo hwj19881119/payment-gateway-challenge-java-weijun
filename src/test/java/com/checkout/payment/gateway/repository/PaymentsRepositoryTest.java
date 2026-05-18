@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class PaymentsRepositoryTest {
 
-  private PaymentsRepositoryInterface repository;
+  private PaymentsRepository repository;
 
   @BeforeEach
   void setUp(){

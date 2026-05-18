@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class InMemoryIdempotencyRecordRepository implements IdempotencyRepositoryInterface {
+public class InMemoryIdempotencyRecordRepository implements IdempotencyRepository {
 
   private static final Logger LOG = LoggerFactory.getLogger(InMemoryIdempotencyRecordRepository.class);
 

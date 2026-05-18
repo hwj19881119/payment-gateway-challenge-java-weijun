@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class IdempotencyRecordRepositoryTest {
 
-  private IdempotencyRepositoryInterface repository;
+  private IdempotencyRepository repository;
 
   @BeforeEach
   void setUp(){
