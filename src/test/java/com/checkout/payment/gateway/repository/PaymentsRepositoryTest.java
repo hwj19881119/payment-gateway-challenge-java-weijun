@@ -8,18 +8,16 @@ import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.model.PaymentDetail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Optional;
 import java.util.UUID;
 
-@SpringBootTest
 public class PaymentsRepositoryTest {
 
-  private PaymentsRepository repository;
+  private PaymentsRepositoryInterface repository;
 
   @BeforeEach
   void setUp(){
-    repository = new PaymentsRepository();
+    repository = new InMemoryPaymentsRepository();
   }
 
   @Test

@@ -9,7 +9,8 @@ import com.checkout.payment.gateway.dto.PostPaymentResponse;
 import com.checkout.payment.gateway.enums.IdempotencyStatus;
 import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.model.IdempotencyRecord;
-import com.checkout.payment.gateway.repository.IdempotencyRecordRepository;
+import com.checkout.payment.gateway.repository.IdempotencyRepositoryInterface;
+import com.checkout.payment.gateway.repository.InMemoryIdempotencyRecordRepository;
 import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckResult;
 
 import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckResult.Type;
@@ -24,7 +25,7 @@ public class IdempotencyServiceTest {
 
 
   private IdempotencyService idempotencyService;
-  private IdempotencyRecordRepository idempotencyRepository;
+  private IdempotencyRepositoryInterface idempotencyRepository;
 
   /**
    * generate PostPaymentRequest using different amount
@@ -68,7 +69,7 @@ public class IdempotencyServiceTest {
 
   @BeforeEach
   void setUp(){
-    idempotencyRepository = new IdempotencyRecordRepository();
+    idempotencyRepository = new InMemoryIdempotencyRecordRepository();
     idempotencyService = new IdempotencyService(idempotencyRepository);
   }
 

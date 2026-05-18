@@ -10,19 +10,17 @@ import com.checkout.payment.gateway.enums.PaymentStatus;
 import com.checkout.payment.gateway.model.IdempotencyRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Optional;
 import java.util.UUID;
 
 
-@SpringBootTest
 public class IdempotencyRecordRepositoryTest {
 
-  private IdempotencyRecordRepository repository;
+  private IdempotencyRepositoryInterface repository;
 
   @BeforeEach
   void setUp(){
-    repository = new IdempotencyRecordRepository();
+    repository = new InMemoryIdempotencyRecordRepository();
   }
 
   @Test
