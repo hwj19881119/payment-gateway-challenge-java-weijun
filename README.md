@@ -100,13 +100,13 @@ Call `idempotencyService.checkOrCreateRequest()` with the key and request. This 
 **Step 2 — Business validation**
 
 Run `validator.validate(paymentRequest)`. If errors are found:
-- Delete the `IN_PROGRES`S idempotency record (so the key can be retried with corrected data)
+- Delete the `IN_PROGRESS` idempotency record (so the key can be retried with corrected data)
 - Throw `PaymentRejectedException` → 422
 
 **Step 3 — Bank authorization**
 
 Build a `BankRequest` and call `bankClient.sendPayment()`. On `BankServiceException`:
-- Delete the IN_PROGRESS idempotency record (so the key can be retried)
+- Delete the `IN_PROGRESS` idempotency record (so the key can be retried)
 - Re-throw → 502
 
 **Step 4 — Save payment**
