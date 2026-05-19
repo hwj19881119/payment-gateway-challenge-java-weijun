@@ -16,11 +16,13 @@ import com.checkout.payment.gateway.repository.PaymentsRepository;
 import com.checkout.payment.gateway.service.IdempotencyService.IdempotencyCheckResult;
 import com.checkout.payment.gateway.validation.PaymentRequestValidator;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
@@ -45,6 +47,8 @@ class PaymentGatewayServiceTest {
   @Mock IdempotencyService idempotencyService;
   @Mock PaymentRequestValidator validator;
   @Mock BankClient bankClient;
+
+  @Spy SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
 
   @InjectMocks PaymentGatewayService service;
 
@@ -103,6 +107,7 @@ class PaymentGatewayServiceTest {
     assertThrows(IdempotencyConflictException.class,
         () -> service.processPayment(IDEMPOTENCY_KEY, validRequest()));
 
+    assertEquals(1.0, meterRegistry.counter("idempotency_total", "status", "in_progress").count());
     verifyNoInteractions(validator, bankClient, paymentsRepository);
   }
 
@@ -114,6 +119,7 @@ class PaymentGatewayServiceTest {
     assertThrows(IdempotencyConflictException.class,
         () -> service.processPayment(IDEMPOTENCY_KEY, validRequest()));
 
+    assertEquals(1.0, meterRegistry.counter("idempotency_total", "status", "conflict").count());
     verifyNoInteractions(validator, bankClient, paymentsRepository);
   }
 
@@ -130,6 +136,7 @@ class PaymentGatewayServiceTest {
 
     assertEquals(cached, result.response());
     assertEquals(true, result.cached());
+    assertEquals(1.0, meterRegistry.counter("idempotency_total", "status", "cached").count());
     verifyNoInteractions(validator, bankClient, paymentsRepository);
   }
 
@@ -145,6 +152,7 @@ class PaymentGatewayServiceTest {
         () -> service.processPayment(IDEMPOTENCY_KEY, validRequest()));
 
     assertEquals(List.of("Card has been expired."), ex.getErrors());
+    assertEquals(1.0, meterRegistry.counter("payments_total", "status", "rejected").count());
     verify(idempotencyService).deleteRequest(IDEMPOTENCY_KEY);
     verifyNoInteractions(bankClient, paymentsRepository);
   }
@@ -187,6 +195,7 @@ class PaymentGatewayServiceTest {
 
     // verify idempotency completion
     verify(idempotencyService).completeRequest(eq(IDEMPOTENCY_KEY), any(PostPaymentResponse.class));
+    assertEquals(1.0, meterRegistry.counter("payments_total", "status", "authorized").count());
   }
 
   // ===== processPayment declined — declined by bank =====
@@ -212,6 +221,7 @@ class PaymentGatewayServiceTest {
 
     assertEquals(false, result.cached());
     assertEquals(PaymentStatus.DECLINED, result.response().status());
+    assertEquals(1.0, meterRegistry.counter("payments_total", "status", "declined").count());
   }
 
   // ===== processPayment bad gateway — bank service exception =====
@@ -229,6 +239,7 @@ class PaymentGatewayServiceTest {
     assertThrows(BankServiceException.class,
         () -> service.processPayment(IDEMPOTENCY_KEY, request));
 
+    assertEquals(1.0, meterRegistry.counter("payments_total", "status", "bank_error").count());
     verify(idempotencyService).deleteRequest(IDEMPOTENCY_KEY);
     verifyNoInteractions(paymentsRepository);
   }
