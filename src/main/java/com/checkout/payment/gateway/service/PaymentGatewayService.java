@@ -73,7 +73,7 @@ public class PaymentGatewayService {
         throw new IdempotencyConflictException(
             "Idempotency key has already been used with a different body", idempotencyKey);
       case CACHED:
-        LOG.warn("Idempotency result: request has been cached for key={}", idempotencyKey);
+        LOG.info("Idempotency result: request has been cached for key={}", idempotencyKey);
         // return with status code
         return ProcessPaymentResult.cachedPayment(idempotencyResult.cachedResponse());
       case CREATED:

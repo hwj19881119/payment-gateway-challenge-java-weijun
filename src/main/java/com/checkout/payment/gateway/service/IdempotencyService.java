@@ -65,7 +65,7 @@ public class IdempotencyService {
   }
 
   public void deleteRequest(String idempotencyKey){
-    LOG.info("Idempotency delete: key={}", idempotencyKey);
+    LOG.debug("Idempotency delete: key={}", idempotencyKey);
     idempotencyRepository.delete(idempotencyKey);
   }
 
