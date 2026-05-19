@@ -7,6 +7,7 @@ A RESTful payment gateway service built with Spring Boot 3.1 and Java 17. It pro
 - [Key Considerations & Assumptions](#key-considerations--assumptions)
 - [Architecture Overview](#architecture-overview)
 - [Payment Processing Flow](#payment-processing-flow)
+- [Observability](#observability)
 - [Getting Started](#getting-started)
 - [API Specifications](#api-specifications)
 - [Status Code Summary](#status-code-summary)
@@ -118,6 +119,27 @@ Map the bank response to a `PaymentDetail` (status = `Authorized`/`Declined`, la
 
 Mark the idempotency record as `COMPLETED` and cache the `PostPaymentResponse`. Return with HTTP 201.
 
+
+---
+
+## Observability
+
+### Metrics (Micrometer + Prometheus)
+
+Payment-specific counters and timers are registered via Micrometer which can support for Prometheus scraping.
+
+| Metric Name | Type | Tags | Description |
+|---|---|---|---|
+| `payments_total` | Counter | `status=authorized\|declined\|rejected\|bank_error` | Payment outcome counts |
+| `idempotency_total` | Counter | `status=cached\|conflict\|in_progress` | Idempotency event counts |
+| `payment_bank_call_duration` | Timer | — | Bank call latency |
+
+### Actuator Endpoints
+
+| Endpoint | Description                         |
+|---|-------------------------------------|
+| `/actuator/health` | Application and bank health         |
+| `/actuator/metrics` | Individual metrics in JSON          |
 
 ---
 
@@ -474,7 +496,7 @@ payment.allowed-currencies=USD,GBP,EUR
 - **Idempotency TTL** — Background job to evict records older than a configurable TTL (e.g., 24 hours) to prevent unbounded memory growth.
 - **Persistent storage** — Replace `ConcurrentHashMap` with a real database (PostgreSQL, DynamoDB) for durability across restarts.
 - **Rate limiting** — Per-merchant rate limiting to prevent abuse.
-- **Observability** — Structured logging, metrics (payment success/decline rates, latency), distributed tracing, and health checks.
+- **Distributed tracing** — Integrate OpenTelemetry/Jaeger for cross-service request tracing.
 - **Webhook notifications** — Notify merchants of async payment status changes instead of requiring polling.
 - **Partial captures and refunds** — Support for post-authorization operations.
 - **`RestTemplate` migration** — Migrate to `RestClient` (Spring 6.1+) as `RestTemplate` is in maintenance mode.
