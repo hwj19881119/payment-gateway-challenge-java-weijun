@@ -355,24 +355,7 @@ Run all tests:
 
 The following improvements would be needed to make this a production-ready payment gateway:
 
-### 4.1 Multi-Tenant Idempotency
-
-`IdempotencyRecord` should include a `merchantId` field. Currently, all merchants share the same idempotency namespace, meaning two different merchants could collide on the same key. The composite key should be `(merchantId, idempotencyKey)`.
-
-
-### 4.2 Configurable Currency Allowlist
-
-The allowed currency list is hardcoded as `Set.of("USD", "GBP", "EUR")` in `PaymentRequestValidator`. This should be externalized to `application.properties` or a database table so it can be updated without redeployment:
-
-```properties
-payment.allowed-currencies=USD,GBP,EUR
-```
-
-### 4.3 Idempotency Key Cleanup on Bank Error
-
-When business validation fails or the bank returns an error (`BankServiceException`), the `IN_PROGRESS` idempotency record is deleted so the merchant can retry with the same key. Currently there is no TTL-based cleanup for records that remain due to unexpected server crashes during processing. Production should implement a background job to evict stale `IN_PROGRESS` records older than a configurable TTL (e.g., 5 minutes).
-
-### 4.4 PCI Service Separation
+### PCI Service Separation
 
 Split the application into PCI-scoped and non-PCI-scoped services:
 
@@ -383,6 +366,107 @@ Split the application into PCI-scoped and non-PCI-scoped services:
   - Encrypted database with PCI-compliant access controls
 
 - **Non-PCI Service** — handles business logic using only masked card data (last 4 digits) and tokens. No card data ever enters this service.
+
+### Async Payment Processing with Kafka
+
+The current synchronous design blocks the merchant's HTTP connection while waiting for the bank response. For production, payments should be processed asynchronously using Kafka to decouple the request from bank processing.
+
+**Target architecture:**
+
+```
+┌──────────┐   POST /payments    ┌──────────────────┐   publish    ┌──────────┐
+│ Merchant │  ────────────────>  │ Payment Gateway  │  ─────────>  │  Kafka   │
+│ (Client) │  <───── 202 ──────  │  (API Layer)     │              │  Topic   │
+└──────────┘                     └──────────────────┘              └──────────┘
+                                                                        │
+                                                          ┌─────────────┘
+                                                          ▼
+                                               ┌──────────────────┐    HTTP POST    ┌───────────────┐
+                                               │ Payment Worker   │  ────────────>  │ Bank Simulator│
+                                               │ (Consumer)       │  <────────────  │               │
+                                               └──────────────────┘                 └───────────────┘
+```
+
+**Flow:**
+
+1. Merchant sends `POST /payments` with `Idempotency-Key`
+2. Gateway validates the request, saves payment with `PENDING` status, returns **202 Accepted** with payment ID
+3. Gateway publishes a `PaymentRequestEvent` to Kafka topic
+4. Payment Worker (consumer) picks up the event, calls the bank, updates payment to `AUTHORIZED` / `DECLINED`
+5. Merchant polls `GET /payments/{id}` for final status, or receives a webhook notification
+
+**Implementation approach (Outbox Pattern):**
+
+```
+POST /payments → DB transaction: { save PENDING payment + save outbox event } → return 202
+                                        │
+                        Outbox publisher → read event → publish to Kafka
+                                                  │
+                                    Consumer → call bank → update payment → mark outbox processed
+```
+
+The outbox pattern guarantees at-least-once delivery — the event is persisted in the same DB transaction as the payment, so no messages are lost even if Kafka is temporarily unavailable.
+
+**Why Kafka over `@Async`:**
+
+| Concern | `@Async` | Kafka |
+|---------|----------|-------|
+| Crash safety | Lost if app restarts | Messages survive restarts |
+| Retry on failure | Manual | Built-in (DLQ, retry topics) |
+| Backpressure | None | Consumer controls pace |
+| Scaling | Single JVM | Horizontal (add consumers) |
+| Observability | Thread logs | Kafka metrics, consumer lag |
+
+### Bank Call Safety: Prevent Duplicate Payments
+
+The current design has a crash window — if the system crashes after sending the payment to the bank but before persisting the result, a retry would send a duplicate bank request.
+
+```
+Idempotency CREATED → Validate → [BANK CALL] → crash!
+                                    │
+                                    └─ Bank processed it, but we never saved
+                                       the result or completed the idempotency
+```
+
+**Solution: three-part defense:**
+
+**1. Send idempotency key to the bank**
+
+Include the gateway's idempotency key in the `BankRequest`. The bank deduplicates based on this key — even if retried, the bank returns the original response without re-processing.
+
+**2. Persist PENDING state before bank call**
+
+With a persistent database, save the idempotency record as `PENDING` **before** calling the bank. If the system crashes between send and response, the PENDING record survives the restart and can be reconciled.
+
+**3. Startup reconciliation job**
+
+On application startup, query all `PENDING` idempotency records and reconcile with the bank:
+
+```
+System restart
+  ↓
+Find all PENDING idempotency records
+  ↓
+For each: query bank → "was this payment processed?"
+  ├─ Yes → update to COMPLETED with bank's response
+  └─ No  → delete record (safe to retry)
+```
+
+### Idempotency Key Cleanup on Bank Error
+
+When business validation fails or the bank returns an error (`BankServiceException`), the `IN_PROGRESS` idempotency record is deleted so the merchant can retry with the same key. Currently there is no TTL-based cleanup for records that remain due to unexpected server crashes during processing. Production should implement a background job to evict stale `IN_PROGRESS` records older than a configurable TTL (e.g., 5 minutes).
+
+### Multi-Tenant Idempotency
+
+`IdempotencyRecord` should include a `merchantId` field. Currently, all merchants share the same idempotency namespace, meaning two different merchants could collide on the same key. The composite key should be `(merchantId, idempotencyKey)`.
+
+### Configurable Currency Allowlist
+
+The allowed currency list is hardcoded as `Set.of("USD", "GBP", "EUR")` in `PaymentRequestValidator`. This should be externalized to `application.properties` or a database table so it can be updated without redeployment:
+
+```properties
+payment.allowed-currencies=USD,GBP,EUR
+```
 
 ### Additional Improvements
 
